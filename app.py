@@ -599,11 +599,13 @@ if __name__ == '__main__':
     # Load model
     if load_model_and_classes():
         print("\n✓ Starting Flask server...")
-        print("  Server: http://localhost:5000")
-        print("  API Docs: http://localhost:5000/api/health")
         print("=" * 60 + "\n")
-        
-        app.run(debug=True, host='0.0.0.0', port=5000)
+
+        # Render requires dynamic port
+        port = int(os.environ.get("PORT", 5000))
+
+        app.run(host="0.0.0.0", port=port)
+
     else:
         print("\n✗ Failed to load model. Please check model files.")
-        print("  Expected: efficientnetb3_best.keras or efficientnetb3_final.keras")
+        print("Expected: efficientnetb3_best.keras or efficientnetb3_final.keras")
