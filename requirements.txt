@@ -1,0 +1,21 @@
+# Brain Tumor Detection with Grad-CAM XAI
+# Flask Backend Requirements
+
+# Web Framework
+Flask==3.0.0
+Flask-CORS==4.0.0
+
+# Deep Learning & Image Processing
+tensorflow-cpu>=2.16
+numpy
+opencv-python
+matplotlib
+
+# Utilities
+Pillow
+scipy
+reportlab
+
+# Optional: Production server
+gunicorn
+python-dotenv

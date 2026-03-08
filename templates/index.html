@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Tumor Detection System - XAI Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <svg class="brain-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 3c-1 0-2 1-2 2v2a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h.5M15 3c1 0 2 1 2 2v2a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2h-.5"></path>
+                        <ellipse cx="12" cy="16" rx="3" ry="2"></ellipse>
+                        <path d="M9 20c-1 0-2 1-2 2M15 20c1 0 2 1 2 2"></path>
+                    </svg>
+                    <h1>Brain Tumor Detection</h1>
+                </div>
+                <p class="subtitle">AI-Powered Medical Imaging Analysis with Explainable AI (Grad-CAM)</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Left Panel: Upload Section -->
+                <section class="upload-section">
+                    <div class="card">
+                        <h2>Upload MRI Image</h2>
+                        <div class="upload-area" id="uploadArea">
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <p class="upload-text">Drag and drop your MRI image here<br>or click to select</p>
+                            <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg,image/bmp,image/gif" hidden>
+                        </div>
+                        
+                        <div id="fileInfo" class="file-info hidden">
+                            <p><strong>Selected File:</strong> <span id="fileName"></span></p>
+                            <button id="clearBtn" class="btn-secondary">Clear</button>
+                        </div>
+
+                        <button id="predictBtn" class="btn-primary" disabled>
+                            <span class="btn-text">Analyze Image</span>
+                            <span class="btn-loader hidden"></span>
+                        </button>
+
+                        <div class="info-box">
+                            <h4>📋 Instructions:</h4>
+                            <ul>
+                                <li>Supported formats: JPG, PNG, BMP, GIF</li>
+                                <li>Max file size: 16 MB</li>
+                                <li>Image will be processed using EfficientNetB3</li>
+                                <li>Results include confidence scores and Grad-CAM visualization</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Panel: Results Section -->
+                <section class="results-section">
+                    <div id="resultsContainer" class="results-container hidden">
+                        <div class="card">
+                            <h2>Analysis Results</h2>
+                            
+                            <!-- Prediction Result -->
+                            <div class="result-box">
+                                <div class="prediction-header">
+                                    <h3>🔍 Prediction</h3>
+                                    <span class="timestamp" id="resultTimestamp"></span>
+                                </div>
+                                
+                                <div class="prediction-result">
+                                    <div class="class-badge" id="predictedClass"></div>
+                                    <div class="confidence-meter">
+                                        <div class="confidence-label">
+                                            <span>Confidence</span>
+                                            <span id="confidenceScore" class="confidence-value">0%</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Confidence Scores for All Classes -->
+                            <div class="result-box">
+                                <h3>📊 Detailed Scores</h3>
+                                <div id="confidenceScores" class="confidence-scores">
+                                    <!-- Dynamically populated -->
+                                </div>
+                            </div>
+
+                            <!-- Tumor Information -->
+                            <div class="result-box tumor-info-box">
+                                <h3>🏥 Tumor Information & Health Effects</h3>
+                                <div id="tumorInfo" class="tumor-info">
+                                    <!-- Dynamically populated -->
+                                </div>
+                            </div>
+
+                            <!-- Grad-CAM Visualization -->
+                            <div class="result-box">
+                                <h3>🧠 Grad-CAM Explanation</h3>
+                                <p class="xai-description">
+                                    The heatmap below shows which regions of the MRI image contributed most to the prediction. 
+                                    Warmer colors (red/yellow) indicate areas the model focused on.
+                                </p>
+                                <div class="gradcam-container">
+                                    <img id="gradcamImage" src="" alt="Grad-CAM Visualization" class="gradcam-image">
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="result-actions">
+                                <button id="downloadResultBtn" class="btn-secondary">
+                                    <span>📥 Download Report</span>
+                                </button>
+                                <button id="newAnalysisBtn" class="btn-primary">
+                                    <span>➕ New Analysis</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="emptyState" class="empty-state">
+                        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                        <p>Upload an MRI image to get started</p>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="loadingState" class="loading-state hidden">
+                        <div class="spinner"></div>
+                        <p>Analyzing image...</p>
+                        <div class="progress-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+
+                    <!-- Error State -->
+                    <div id="errorState" class="error-state hidden">
+                        <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <p id="errorMessage"></p>
+                        <button id="dismissErrorBtn" class="btn-secondary">Dismiss</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>🏥 Brain Tumor Detection System | Powered by EfficientNetB3 + Grad-CAM XAI</p>
+            <p style="font-size: 0.85rem; margin-top: 0.5rem;">⚠️ This tool is for educational purposes. Always consult medical professionals for diagnosis.</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
