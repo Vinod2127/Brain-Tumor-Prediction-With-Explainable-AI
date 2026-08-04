@@ -1,6 +1,10 @@
-# Ignore model files
-*.keras
-*.h5
+# Ignore model files by default, but keep deployment artifacts tracked
+# *.keras
+# *.h5
+
+# Allow required model files to be committed for deployment
+!efficientnetb3_best.keras
+!efficientnetb3_final.keras
 
 # Ignore virtual environment
 venv/
