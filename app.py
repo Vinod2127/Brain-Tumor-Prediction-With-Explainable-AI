@@ -20,9 +20,11 @@ from tensorflow.keras.models import Model
 from flask import Flask, render_template, request, jsonify, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
+from werkzeug.exceptions import HTTPException, RequestEntityTooLarge
 from io import BytesIO
 import base64
 import json
+import traceback
 from datetime import datetime
 from config import config, CLASS_DESCRIPTIONS
 from reportlab.lib.pagesizes import letter, A4
@@ -589,10 +591,21 @@ def not_found(error):
     """Handle 404 errors"""
     return jsonify({'error': 'Endpoint not found'}), 404
 
-@app.errorhandler(500)
-def internal_error(error):
-    """Handle 500 errors"""
-    return jsonify({'error': 'Internal server error'}), 500
+@app.errorhandler(RequestEntityTooLarge)
+def request_entity_too_large(error):
+    """Handle file upload limits"""
+    return jsonify({'error': 'Uploaded file is too large. Max size is 16 MB.'}), 413
+
+@app.errorhandler(HTTPException)
+def handle_http_exception(error):
+    """Return JSON for HTTP exceptions"""
+    return jsonify({'error': error.description or 'HTTP error occurred'}), error.code or 500
+
+@app.errorhandler(Exception)
+def handle_exception(error):
+    """Return JSON for uncaught errors"""
+    traceback.print_exc()
+    return jsonify({'error': f'Internal server error: {str(error)}'}), 500
 
 # ==================== MAIN ====================
 
