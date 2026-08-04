@@ -591,13 +591,20 @@ def internal_error(error):
 
 # ==================== MAIN ====================
 
+# Load the model when the module is imported.
+# This is required for deployments using Gunicorn / WSGI,
+# because the __main__ block is not executed.
+if not load_model_and_classes():
+    print("\n✗ Failed to load model during import. Please check that the model files are present and accessible.")
+    print("Expected: efficientnetb3_best.keras or efficientnetb3_final.keras")
+
+
 if __name__ == '__main__':
     print("=" * 60)
     print("Brain Tumor Detection with Grad-CAM XAI")
     print("=" * 60)
     
-    # Load model
-    if load_model_and_classes():
+    if model is not None:
         print("\n✓ Starting Flask server...")
         print("=" * 60 + "\n")
 
@@ -605,7 +612,6 @@ if __name__ == '__main__':
         port = int(os.environ.get("PORT", 5000))
 
         app.run(host="0.0.0.0", port=port)
-
     else:
-        print("\n✗ Failed to load model. Please check model files.")
+        print("\n✗ Model failed to load. Please check model files.")
         print("Expected: efficientnetb3_best.keras or efficientnetb3_final.keras")
