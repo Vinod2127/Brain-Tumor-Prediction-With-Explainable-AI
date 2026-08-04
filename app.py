@@ -4,6 +4,11 @@ Brain Tumor Detection Flask Backend with Grad-CAM XAI
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow logging
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['MKL_NUM_THREADS'] = '1'
+os.environ['TF_NUM_INTRAOP_THREADS'] = '1'
+os.environ['TF_NUM_INTEROP_THREADS'] = '1'
+os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
 
 import cv2
 import numpy as np
@@ -316,7 +321,7 @@ def load_model_and_classes():
             raise FileNotFoundError(f"Model file not found. Looking for {model_path}")
         
         print(f"Loading model from {model_path}...")
-        model = tf.keras.models.load_model(model_path)
+        model = tf.keras.models.load_model(model_path, compile=False)
         print(f"✓ Model loaded successfully. Input shape: {model.input_shape}")
         
         # Use class names from config
