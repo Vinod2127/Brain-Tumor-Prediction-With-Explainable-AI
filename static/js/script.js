@@ -180,12 +180,20 @@ async function predictTumor() {
             body: formData
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Prediction failed');
+        const contentType = response.headers.get('content-type') || '';
+        let result;
+
+        if (contentType.includes('application/json')) {
+            result = await response.json();
+        } else {
+            const text = await response.text();
+            throw new Error(text || 'Prediction failed: received non-JSON response');
         }
 
-        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.error || 'Prediction failed');
+        }
+
         displayResults(result);
         lastPrediction = result;
         showToast('✓ Analysis complete', 'success');
