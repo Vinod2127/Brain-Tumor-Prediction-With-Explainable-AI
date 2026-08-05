@@ -428,15 +428,16 @@ def predict():
         predicted_class = class_names[predicted_idx]
         confidence = float(predictions[predicted_idx]) * 100
         
-        # Generate Grad-CAM
-        heatmap = generate_gradcam(img_batch, model, last_conv_layer)
-        gradcam_img = heatmap_to_base64(heatmap, img_resized)
-        
         # Get confidence scores for all classes
         confidence_scores = {
             class_names[i]: float(predictions[i]) * 100
             for i in range(len(class_names))
         }
+        
+        gradcam_img = ''
+        if config.ENABLE_GRADCAM:
+            heatmap = generate_gradcam(img_batch, model, last_conv_layer)
+            gradcam_img = heatmap_to_base64(heatmap, img_resized)
         
         # Save uploaded file
         filename = secure_filename(file.filename)
@@ -444,17 +445,21 @@ def predict():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], timestamp + filename)
         cv2.imwrite(filepath, img)
         
-        return jsonify({
+        payload = {
             'status': 'success',
             'predicted_class': predicted_class,
             'confidence': round(confidence, 2),
             'confidence_scores': {k: round(v, 2) for k, v in confidence_scores.items()},
-            'gradcam': gradcam_img,
             'all_predictions': confidence_scores,
             'input_shape': list(original_shape),
             'timestamp': datetime.now().isoformat(),
             'uploaded_file': filepath
-        }), 200
+        }
+        
+        if gradcam_img:
+            payload['gradcam'] = gradcam_img
+        
+        return jsonify(payload), 200
     
     except Exception as e:
         print(f"Error in prediction: {str(e)}")

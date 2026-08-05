@@ -34,6 +34,9 @@ class Config:
     # Class names for brain tumors
     CLASS_NAMES = ['glioma_tumor', 'meningioma_tumor', 'no_tumor', 'pituitary_tumor']
     
+    # Explainability
+    ENABLE_GRADCAM = os.getenv('GRADCAM_ENABLED', 'false').lower() in ('1', 'true', 'yes')
+
     # Server settings
     HOST = os.getenv('HOST', '0.0.0.0')
     PORT = int(os.getenv('PORT', 5000))
